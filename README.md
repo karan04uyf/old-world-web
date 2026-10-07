@@ -29,4 +29,3 @@ SMTP_HOST, SMTP_PORT (default 587), SMTP_FROM, SMTP_USER, and SMTP_PASSWORD must
 - Hero and portrait artwork were generated; the city image is illustrative, not a historical source photograph.
 
 Only deploy the contents of `public/` as publicly accessible website files. Keep backend source, environment settings, and private records outside the public document root.
-
