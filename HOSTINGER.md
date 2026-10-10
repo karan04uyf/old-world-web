@@ -21,6 +21,7 @@ Official instructions: https://www.hostinger.com/support/1583302-how-to-deploy-a
 1. Gumroad: supply the final ebook product link and connect the “I want this” button.
 2. OTP signup: the included Python script is for local preview. A production backend, SMTP credentials, HTTPS, private persistent storage, and routing for `/api/signup/request` and `/api/signup/verify` are needed. Uploading HTML files does not enable this service. Choose an implementation compatible with your Hostinger plan before enabling live signup.
 3. Replace the sample ebook details and example reviews with approved launch content.
-4. Supply the Instagram link if it should be live.
+4. Social links and the Gmail promotion enquiry link are connected. Individual video embeds still require specific video URLs.
 
 Do not place the `private/` directory, databases, or email credentials in public_html or GitHub. No such files are in this package.
+

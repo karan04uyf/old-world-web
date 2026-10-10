@@ -1,5 +1,5 @@
 const productDetails = {
-  'ebook-1': { title: 'First ebook title' },
+  'ebook-1': { title: 'The first edition' },
   'ebook-2': { title: 'Second ebook title' },
   'ebook-3': { title: 'Third ebook title' }
 };
@@ -47,7 +47,7 @@ document.addEventListener('click', (event) => {
   if (actionType === 'checkout') {
     const product = productDetails[action.dataset.product];
     const title = product?.title ?? 'This ebook';
-    showInfo('Gumroad link to be added', `The Gumroad product page for “${title}” will be connected here after the ebook is published.`);
+    showInfo('This edition is coming soon', `Checkout for “${title}” will be available when the ebook is released.`);
   }
 
   if (actionType === 'social') {
@@ -76,42 +76,20 @@ document.querySelectorAll('.faq-item').forEach((item) => {
   });
 });
 
-const track = document.querySelector('#review-track');
-const pause = document.querySelector('#review-pause');
 const reducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)');
-let paused = reducedMotion.matches;
-let touching = false;
-function moveReview(direction) {
-  const step = track.querySelector('.review-card').getBoundingClientRect().width + 20;
-  const end = track.scrollWidth - track.clientWidth;
-  let next = track.scrollLeft + direction * step;
-  if (next > end + 4) next = 0;
-  if (next < -4) next = end;
-  track.scrollTo({left: next, behavior: reducedMotion.matches ? 'instant' : 'smooth'});
-}
-function updatePause() {
-  pause.textContent = paused ? 'Play motion' : 'Pause motion';
-  pause.setAttribute('aria-pressed', String(paused));
-}
-if (track && pause) {
-  updatePause();
-  pause.addEventListener('click', () => { paused = !paused; updatePause(); });
-  document.querySelector('#review-prev').addEventListener('click', () => moveReview(-1));
-  document.querySelector('#review-next').addEventListener('click', () => moveReview(1));
-  track.addEventListener('pointerenter', () => { touching = true; });
-  track.addEventListener('pointerleave', () => { touching = false; });
-  track.addEventListener('touchstart', () => { paused = true; updatePause(); }, {passive: true});
-  track.addEventListener('keydown', (event) => {
-    if (event.key === 'ArrowRight' || event.key === 'ArrowLeft') {
-      event.preventDefault(); moveReview(event.key === 'ArrowRight' ? 1 : -1);
-    }
+const track = document.querySelector('#review-track');
+// Readers can swipe, scroll, or use arrow keys without extra controls.
+track?.addEventListener('keydown', (event) => {
+  if (event.key !== 'ArrowRight' && event.key !== 'ArrowLeft') return;
+  const card = track.querySelector('.review-card');
+  if (!card) return;
+  event.preventDefault();
+  const step = card.getBoundingClientRect().width + 20;
+  track.scrollBy({
+    left: event.key === 'ArrowRight' ? step : -step,
+    behavior: reducedMotion.matches ? 'instant' : 'smooth'
   });
-  setInterval(() => {
-    const bounds = track.getBoundingClientRect();
-    if (!paused && !touching && !document.hidden && !document.querySelector('#reviews').contains(document.activeElement) && bounds.top < innerHeight && bounds.bottom > 0) moveReview(1);
-  }, 5500);
-}
-
+});
 const joinForm = document.querySelector('#join-form');
 const verifyForm = document.querySelector('#verify-form');
 const signupStatus = document.querySelector('#join-status');
@@ -166,3 +144,36 @@ document.addEventListener('keydown', (event) => {
     menuToggle.focus();
   }
 });
+
+// Keep navigation and motion controls consistent across devices.
+function closeNavigation() {
+  mainNav?.classList.remove('is-open');
+  menuToggle?.setAttribute('aria-expanded', 'false');
+  menuToggle?.setAttribute('aria-label', 'Open navigation');
+}
+document.addEventListener('click', (event) => {
+  if (!event.target.closest('.site-header')) closeNavigation();
+});
+window.matchMedia('(min-width: 1051px)').addEventListener('change', closeNavigation);
+const purchaseBar = document.querySelector('.sticky-purchase');
+const purchaseMotion = document.querySelector('.purchase-motion');
+let purchasePaused = reducedMotion.matches;
+function updatePurchaseMotion() {
+  purchaseBar?.classList.toggle('motion-paused', purchasePaused);
+  if (!purchaseMotion) return;
+  purchaseMotion.textContent = purchasePaused ? 'Resume motion' : 'Pause motion';
+  purchaseMotion.setAttribute('aria-pressed', String(purchasePaused));
+  purchaseMotion.setAttribute('aria-label', purchasePaused ? 'Resume purchase bar motion' : 'Pause purchase bar motion');
+  purchaseMotion.hidden = reducedMotion.matches;
+}
+purchaseMotion?.addEventListener('click', () => {
+  purchasePaused = !purchasePaused;
+  updatePurchaseMotion();
+});
+reducedMotion.addEventListener('change', () => {
+  purchasePaused = reducedMotion.matches;
+
+  updatePurchaseMotion();
+
+});
+updatePurchaseMotion();
